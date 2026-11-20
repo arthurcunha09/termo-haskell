@@ -1,6 +1,5 @@
-module Main where
-
 import Data.Char (isAsciiUpper, isSpace, toUpper)
+import Data.List (delete)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 
 type Palavra = String
@@ -28,14 +27,8 @@ marcar :: String -> [(Char, Bool)] -> [Status]
 marcar _ [] = []
 marcar disp ((_, True) : resto) = Correta : marcar disp resto
 marcar disp ((c, False) : resto)
-  | c `elem` disp = Deslocada : marcar (remover c disp) resto
+  | c `elem` disp = Deslocada : marcar (delete c disp) resto
   | otherwise     = Ausente : marcar disp resto
-
-remover :: Eq a => a -> [a] -> [a]
-remover _ [] = []
-remover x (y : ys)
-  | x == y    = ys
-  | otherwise = y : remover x ys
 
 validar :: [Palavra] -> String -> Either String Palavra
 validar aceitas texto
@@ -84,4 +77,4 @@ laco aceitas jogo =
         Right p -> do
           let ss = avaliar (segredo jogo) p
           putStrLn (mostrar p ss)
-          laco aceitas (Jogo (segredo jogo) (restantes jogo - 1) (ss : palpites jogo))
+          laco aceitas jogo { restantes = restantes jogo - 1, palpites = ss : palpites jogo }
